@@ -1,4 +1,6 @@
 class Curl::Downloader
+  VERSION = "0.1"
+
   getter code
 
   @started_at : Time?
