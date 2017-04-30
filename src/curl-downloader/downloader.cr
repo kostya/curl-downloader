@@ -60,12 +60,12 @@ class Curl::Downloader
   end
 
   # ex: timeout = 60 # seconds
-  def timeout=(t : Int32)
+  def timeout=(t : Int32 | Time::Span)
     set_opt(LibCurl::CURLoption::CURLOPT_TIMEOUT, t.to_i)
   end
 
   # ex: connect_timeout = 10 # seconds
-  def connect_timeout=(t : Int32)
+  def connect_timeout=(t : Int32 | Time::Span)
     set_opt(LibCurl::CURLoption::CURLOPT_CONNECTTIMEOUT, t.to_i)
   end
 
@@ -216,11 +216,11 @@ class Curl::Downloader
   end
 
   def local_addr
-    "#{get_info_string(LibCurl::CURLINFO::CURLINFO_LOCAL_IP)}:#{@downloader.get_info_int(LibCurl::CURLINFO::CURLINFO_LOCAL_PORT)}"
+    "#{get_info_string(LibCurl::CURLINFO::CURLINFO_LOCAL_IP)}:#{get_info_int(LibCurl::CURLINFO::CURLINFO_LOCAL_PORT)}"
   end
 
   def remote_addr
-    "#{get_info_string(LibCurl::CURLINFO::CURLINFO_PRIMARY_IP)}:#{@downloader.get_info_int(LibCurl::CURLINFO::CURLINFO_PRIMARY_PORT)}"
+    "#{get_info_string(LibCurl::CURLINFO::CURLINFO_PRIMARY_IP)}:#{get_info_int(LibCurl::CURLINFO::CURLINFO_PRIMARY_PORT)}"
   end
 
   def duration
