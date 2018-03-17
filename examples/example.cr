@@ -8,8 +8,10 @@ d.timeout = 60
 d.cookie_jar = "/tmp/downloader_test.txt"
 d.cookie_file = "/tmp/downloader_test.txt"
 
+# execute request, fiber blocking
 d.execute
 
+# fetch results
 p d.code
 p d.http_status
 
@@ -18,5 +20,3 @@ p d.headers.split("\r\n")
 
 p d.url_effective
 p d.content_type
-
-d.free

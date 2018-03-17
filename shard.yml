@@ -1,5 +1,5 @@
 name: curl-downloader
-version: 0.1
+version: 0.2
 
 authors:
   - Konstantin Makarchev <kostya27@gmail.com>
@@ -9,9 +9,5 @@ crystal: 0.22.0
 dependencies:
   curl-crystal:
     github: blocknotes/curl-crystal
-
-development_dependencies:
-  thread_pool:
-    github: kostya/thread_pool
 
 license: MIT

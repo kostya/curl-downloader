@@ -1,7 +1,7 @@
 class Curl::Downloader
-  VERSION = "0.1"
+  VERSION = "0.2"
 
-  getter code
+  getter code, curl
 
   @started_at : Time?
   @finished_at : Time?
@@ -18,17 +18,27 @@ class Curl::Downloader
     @temp_f64 = 0.0_f64
     @temp_pointer = Pointer(UInt8).new(0)
     @lists = [] of List
+    @ch = Channel(Bool).new
 
     set_opt(LibCurl::CURLoption::CURLOPT_WRITEFUNCTION, WRITE_DATA_CALLBACK)
     set_opt(LibCurl::CURLoption::CURLOPT_WRITEDATA, @content_buffer.as(Void*))
     set_opt(LibCurl::CURLoption::CURLOPT_HEADERDATA, @headers_buffer.as(Void*))
     set_opt(LibCurl::CURLoption::CURLOPT_NOPROGRESS, 1)
     set_opt(LibCurl::CURLoption::CURLOPT_NOSIGNAL, 1)
+    set_opt(LibCurl::CURLoption::CURLOPT_PRIVATE, self.as(Void*))
+  end
+
+  def self.from_easy(easy : LibCurl::CURL*)
+    pointer = Pointer(Void).new(0)
+    LibCurl.curl_easy_getinfo(easy, LibCurl::CURLINFO::CURLINFO_PRIVATE, pointerof(pointer))
+    pointer.as(self)
   end
 
   def set_opt(opt, val)
     LibCurl.curl_easy_setopt @curl, opt, val
   end
+
+  # ======================= OPTIONS ==================================
 
   # ex: body = "bla=1&gg=2"
   def body=(body : String)
@@ -134,36 +144,7 @@ class Curl::Downloader
     set_opt(LibCurl::CURLoption::CURLOPT_MAXREDIRS, max_redirs)
   end
 
-  # =============================== execution =================================
-
-  WRITE_DATA_CALLBACK = ->(ptr : UInt8*, size : LibC::SizeT, nmemb : LibC::SizeT, data : Void*) do
-    slice = Bytes.new(ptr, size * nmemb)
-    data.as(Buffer).receive_data(slice)
-    size * nmemb
-  end
-
-  # run execution
-  def execute
-    return if @finalized
-    @started_at = Time.now
-    @code = LibCurl.curl_easy_perform @curl
-    @finished_at = Time.now
-    true
-  end
-
-  # call this after execution done, also this called when object finalized
-  def free
-    return if @finalized
-    @finalized = true
-    LibCurl.curl_easy_cleanup @curl
-    @lists.each &.free
-  end
-
-  def finalize
-    free
-  end
-
-  # ================== getters =======================
+  # ================== GETTERS =======================
 
   def ok?
     @code == LibCurl::CURLcode::CURLE_OK
@@ -249,5 +230,25 @@ class Curl::Downloader
     unless @temp_pointer.null?
       String.new @temp_pointer
     end
+  end
+
+  # ====================== UTILS =========================
+
+  WRITE_DATA_CALLBACK = ->(ptr : UInt8*, size : LibC::SizeT, nmemb : LibC::SizeT, data : Void*) do
+    slice = Bytes.new(ptr, size * nmemb)
+    data.as(Buffer).receive_data(slice)
+    size * nmemb
+  end
+
+  # call this after execution done, also this called when object finalized
+  def free
+    return if @finalized
+    @finalized = true
+    LibCurl.curl_easy_cleanup @curl
+    @lists.each &.free
+  end
+
+  def finalize
+    free
   end
 end

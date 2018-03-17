@@ -1,6 +1,6 @@
 # curl-downloader
 
-Downloader based on libcurl [binding](https://github.com/blocknotes/curl-crystal). This lib is not natural for crystal because libcurl is thread blocking, so for concurrent execution need to use something like [thread_pool](https://github.com/kostya/thread_pool)
+Powerfull http client for Crystal based on libcurl [binding](https://github.com/blocknotes/curl-crystal). LibCurl is much more powerfull than std crystal http-client, with features like: redirects, dns caching, socks, proxing, sessions, and many others. This lib is not io or thread blocking, because uses for execution combination of curl multi interface and libevent. Ready to use for high concurrency requests. 
 
 ## Installation
 
@@ -25,8 +25,10 @@ d.timeout = 60
 d.cookie_jar = "/tmp/downloader_test.txt"
 d.cookie_file = "/tmp/downloader_test.txt"
 
+# execute request, fiber blocking
 d.execute
 
+# fetch results
 p d.code
 p d.http_status
 
@@ -39,32 +41,28 @@ p d.content_type
 d.free
 ```
 
-## Example with thread_pool, to execute request in the background, and not to lock crystal main thread
+## Concurrent execution
 
 ```crystal
 require "curl-downloader"
-require "thread_pool"
 
-class Task
-  include ThreadPool::Task
-  def initialize(@downloader : Curl::Downloader); end
-  def execute; @downloader.execute; end
+def request(url)
+  d = Curl::Downloader.new
+  d.url = url
+  d
 end
 
-pool = ThreadPool.new(size: 4).run
+# run with examples/test-server.cr
+reqs = Array.new((ARGV[0]? || 10).to_i) { request("http://127.0.0.1:8089/delay?n=#{rand(1.0)}") }
 
-downloader = Curl::Downloader.new
-downloader.url = "http://127.0.0.1:3000/"
-downloader.timeout = 2
+t = Time.now
 
-pool.execute(Task.new(downloader))
+reqs.each &.execute_async
+reqs.each &.wait
 
-if downloader.ok?
-  p :ok
-  p downloader.http_status
-else
-  p downloader.error_description
+reqs.each do |req|
+  p req.url_effective
 end
 
-downloader.free
+p Time.now - t
 ```

@@ -22,4 +22,11 @@ describe Curl::Downloader do
     d.content_type.should eq "text/html; charset=UTF-8"
     d.free
   end
+
+  it "should set private as self" do
+    d = Curl::Downloader.new
+    d.url = "https://google.com/"
+
+    Curl::Downloader.from_easy(d.curl).should eq d
+  end
 end
