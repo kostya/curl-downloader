@@ -1,6 +1,6 @@
 # curl-downloader
 
-Powerfull http-client for Crystal based on [libcurl](https://curl.haxx.se/libcurl/) [binding](https://github.com/blocknotes/curl-crystal). LibCurl is much more powerfull than std crystal http-client, with features like: redirects, dns caching, interface binding, socks, proxing, sessions, and many others. LibCurl is usually hard to use in event based languages like Crystal, because it block main thread, but this lib avoid thread blocking by using combination of curl multi interface, libevent, and crystal channels. Ready to use for high concurrency requests.
+Powerfull http-client for Crystal based on [libcurl](https://curl.haxx.se/libcurl/) [binding](https://github.com/blocknotes/curl-crystal). LibCurl is much more powerfull than std crystal http-client, with features like: redirects, dns caching, interface binding, socks, proxing, sessions, and many others. LibCurl is usually hard to use directly in event based languages like Crystal, because it block main thread. To avoid thread blocking this lib use combination of curl multi interface, libevent, and crystal channels. Ready to use for high concurrency requests.
 
 ## Installation
 
