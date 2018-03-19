@@ -20,6 +20,8 @@ class Curl::Downloader
         LibEvent2.event_del(GCURL_TIMER_EVENT)
       end
     end
+
+    Curl::Downloader.current_requests_count = still_running
     0
   end
 
@@ -94,10 +96,10 @@ class Curl::Downloader
     #  * the timer to the new value
     #  */
 
-    still_running = 0
-
     if timeout_ms == 0
+      still_running = 0
       LibCurl.curl_multi_socket_action(GCURL_MULTI, LibCurl::CURL_SOCKET_TIMEOUT, 0, pointerof(still_running))
+      Curl::Downloader.current_requests_count = still_running
     elsif timeout_ms == -1
       LibEvent2.event_del(GCURL_TIMER_EVENT)
     else
@@ -111,6 +113,7 @@ class Curl::Downloader
   GCURL_TIMER_CB = ->(fd : LibEvent2::EvutilSocketT, kind : LibEvent2::EventFlags, userp : Void*) do
     still_running = 0
     LibCurl.curl_multi_socket_action(GCURL_MULTI, LibCurl::CURL_SOCKET_TIMEOUT, 0, pointerof(still_running))
+    Curl::Downloader.current_requests_count = still_running
     Curl::Downloader.check_multi_info
     0
   end
@@ -125,6 +128,16 @@ class Curl::Downloader
     ev = LibEvent2.event_new(Scheduler.raw_event_base, LibCurl::CURL_SOCKET_TIMEOUT, LibEvent2::EventFlags::None, GCURL_TIMER_CB, nil)
     LibCurl.curl_multi_setopt(GCURL_MULTI, LibCurl::CURLMoption::CURLMOPT_TIMERFUNCTION, GCURL_MULTI_TIMER_CB)
     ev
+  end
+
+  @@current_requests_count = 0
+
+  def self.current_requests_count
+    @@current_requests_count
+  end
+
+  def self.current_requests_count=(c)
+    @@current_requests_count = c
   end
 end
 

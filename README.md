@@ -4,6 +4,9 @@ Powerfull http-client for Crystal based on libcurl [binding](https://github.com/
 
 ## Installation
 
+    $ brew install curl
+    $ apt-get install libcurl-dev
+
 Add this to your application's `shard.yml`:
 
 ```yaml
