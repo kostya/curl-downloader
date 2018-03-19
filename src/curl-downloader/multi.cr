@@ -153,6 +153,7 @@ class Curl::Downloader
       loop do
         still_running = 0
         LibCurl.curl_multi_perform(multi, pointerof(still_running))
+        Curl::Downloader.current_requests_count = still_running
         check_multi_info(multi)
         sleep interval
       end
