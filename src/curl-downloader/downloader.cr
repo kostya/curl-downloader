@@ -251,4 +251,14 @@ class Curl::Downloader
   def finalize
     free
   end
+
+  # NOT USE IT, THREAD BLOCKING
+  def blocked_execute
+    code = LibCurl.curl_easy_perform @curl
+    set_error_code(code)
+  end
+
+  def set_error_code(code)
+    @code = code
+  end
 end

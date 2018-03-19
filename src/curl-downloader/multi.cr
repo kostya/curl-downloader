@@ -7,6 +7,7 @@ class Curl::Downloader
     end
   end
 
+  # Called from libevent
   GCURL_EVENT_CB = ->(fd : Int32, kind : LibEvent2::EventFlags, data : Void*) do
     action = (kind & LibEvent2::EventFlags::Read ? LibCurl::CURL_CSELECT_IN : 0) |
              (kind & LibEvent2::EventFlags::Write ? LibCurl::CURL_CSELECT_OUT : 0)
@@ -62,6 +63,7 @@ class Curl::Downloader
         LibCurl.curl_multi_remove_handle(GCURL_MULTI, msg.value.easy_handle)
 
         d = Curl::Downloader.from_easy(msg.value.easy_handle)
+        d.set_error_code(msg.value.code)
         d.mark_finished
       end
     end
