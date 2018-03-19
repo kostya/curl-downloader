@@ -14,15 +14,15 @@ class Curl::Downloader
 
     still_running = 0
     rc = LibCurl.curl_multi_socket_action(GCURL_MULTI, fd, action, pointerof(still_running))
+    Curl::Downloader.current_requests_count = still_running
     Curl::Downloader.check_multi_info
 
-    if still_running <= 0
+    if Curl::Downloader.current_requests_count <= 0
       if LibEvent2.event_pending(GCURL_TIMER_EVENT, LibEvent2::EventFlags::Timeout, nil) == 0
         LibEvent2.event_del(GCURL_TIMER_EVENT)
       end
     end
 
-    Curl::Downloader.current_requests_count = still_running
     0
   end
 
@@ -39,13 +39,15 @@ class Curl::Downloader
     self
   end
 
-  def execute_async
+  def execute_async(multi = GCURL_MULTI)
     @started_at = Time.now
-    LibCurl.curl_multi_add_handle(GCURL_MULTI, @curl)
+    LibCurl.curl_multi_add_handle(multi, @curl)
   end
 
   def mark_finished
+    return if @finished
     @finished_at = Time.now
+    @finished = true
     @channel.send(true)
   rescue Channel::ClosedError
   end
@@ -54,13 +56,13 @@ class Curl::Downloader
     @channel.receive
   end
 
-  def self.check_multi_info
+  def self.check_multi_info(multi = GCURL_MULTI)
     while true
-      msg = LibCurl.curl_multi_info_read(GCURL_MULTI, out msgs_left)
+      msg = LibCurl.curl_multi_info_read(multi, out msgs_left)
       break if msg.null?
 
       if msg.value.msg == LibCurl::CURLMSG::CURLMSG_DONE
-        LibCurl.curl_multi_remove_handle(GCURL_MULTI, msg.value.easy_handle)
+        LibCurl.curl_multi_remove_handle(multi, msg.value.easy_handle)
 
         d = Curl::Downloader.from_easy(msg.value.easy_handle)
         d.set_error_code(msg.value.code)
@@ -142,6 +144,19 @@ class Curl::Downloader
 
   def self.current_requests_count=(c)
     @@current_requests_count = c
+  end
+
+  # =================== POLLING ======================
+
+  def self.start_polling(interval = 1.second, multi = GCURL_MULTI)
+    spawn do
+      loop do
+        still_running = 0
+        LibCurl.curl_multi_perform(multi, pointerof(still_running))
+        check_multi_info(multi)
+        sleep interval
+      end
+    end
   end
 end
 

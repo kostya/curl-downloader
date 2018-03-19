@@ -18,7 +18,8 @@ class Curl::Downloader
     @temp_f64 = 0.0_f64
     @temp_pointer = Pointer(UInt8).new(0)
     @lists = [] of List
-    @channel = Channel(Bool).new
+    @channel = Channel::Buffered(Bool).new(1)
+    @finished = false
 
     set_opt(LibCurl::CURLoption::CURLOPT_WRITEFUNCTION, WRITE_DATA_CALLBACK)
     set_opt(LibCurl::CURLoption::CURLOPT_WRITEDATA, @content_buffer.as(Void*))
@@ -256,6 +257,7 @@ class Curl::Downloader
   def blocked_execute
     code = LibCurl.curl_easy_perform @curl
     set_error_code(code)
+    @finished = true
   end
 
   def set_error_code(code)
