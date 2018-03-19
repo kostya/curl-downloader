@@ -30,9 +30,9 @@ class Curl::Downloader
 
   # ======================= OPTIONS ==================================
 
-  # ex: body = "bla=1&gg=2"
-  def body=(body : String)
-    set_opt(LibCurl::CURLoption::CURLOPT_POSTFIELDS, body)
+  # ex: url = "https://google.com/"
+  def url=(url : String)
+    set_opt(LibCurl::CURLoption::CURLOPT_URL, url)
   end
 
   # ex: method = "POST", default: "GET"
@@ -40,9 +40,9 @@ class Curl::Downloader
     set_opt(LibCurl::CURLoption::CURLOPT_CUSTOMREQUEST, method)
   end
 
-  # ex: url = "https://google.com/"
-  def url=(url : String)
-    set_opt(LibCurl::CURLoption::CURLOPT_URL, url)
+  # ex: body = "bla=1&gg=2"
+  def body=(body : String)
+    set_opt(LibCurl::CURLoption::CURLOPT_POSTFIELDS, body)
   end
 
   # ex: auth_basic = "login:password"

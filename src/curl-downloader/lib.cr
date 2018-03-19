@@ -95,7 +95,7 @@ lib LibCurl
   struct CURLMsg
     msg : CURLMSG       # /* what this message means */
     easy_handle : CURL* # /* the handle it concerns */
-    code : CURLcode        # /* message-specific data */
+    code : CURLcode     # /* message-specific data */
   end
 
   alias CURL_SOCKET_T = Int32
