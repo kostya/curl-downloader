@@ -45,12 +45,12 @@ class Curl::Downloader
 
   def mark_finished
     @finished_at = Time.now
-    @ch.send(true)
+    @channel.send(true)
   rescue Channel::ClosedError
   end
 
   def wait
-    @ch.receive
+    @channel.receive
   end
 
   def self.check_multi_info

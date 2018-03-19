@@ -1,7 +1,7 @@
 class Curl::Downloader
   VERSION = "0.2"
 
-  getter code, curl
+  getter code, curl, channel
 
   @started_at : Time?
   @finished_at : Time?
@@ -18,7 +18,7 @@ class Curl::Downloader
     @temp_f64 = 0.0_f64
     @temp_pointer = Pointer(UInt8).new(0)
     @lists = [] of List
-    @ch = Channel(Bool).new
+    @channel = Channel(Bool).new
 
     set_opt(LibCurl::CURLoption::CURLOPT_WRITEFUNCTION, WRITE_DATA_CALLBACK)
     set_opt(LibCurl::CURLoption::CURLOPT_WRITEDATA, @content_buffer.as(Void*))
@@ -26,16 +26,6 @@ class Curl::Downloader
     set_opt(LibCurl::CURLoption::CURLOPT_NOPROGRESS, 1)
     set_opt(LibCurl::CURLoption::CURLOPT_NOSIGNAL, 1)
     set_opt(LibCurl::CURLoption::CURLOPT_PRIVATE, self.as(Void*))
-  end
-
-  def self.from_easy(easy : LibCurl::CURL*)
-    pointer = Pointer(Void).new(0)
-    LibCurl.curl_easy_getinfo(easy, LibCurl::CURLINFO::CURLINFO_PRIVATE, pointerof(pointer))
-    pointer.as(self)
-  end
-
-  def set_opt(opt, val)
-    LibCurl.curl_easy_setopt @curl, opt, val
   end
 
   # ======================= OPTIONS ==================================
@@ -233,6 +223,16 @@ class Curl::Downloader
   end
 
   # ====================== UTILS =========================
+
+  def self.from_easy(easy : LibCurl::CURL*)
+    pointer = Pointer(Void).new(0)
+    LibCurl.curl_easy_getinfo(easy, LibCurl::CURLINFO::CURLINFO_PRIVATE, pointerof(pointer))
+    pointer.as(self)
+  end
+
+  def set_opt(opt, val)
+    LibCurl.curl_easy_setopt @curl, opt, val
+  end
 
   WRITE_DATA_CALLBACK = ->(ptr : UInt8*, size : LibC::SizeT, nmemb : LibC::SizeT, data : Void*) do
     slice = Bytes.new(ptr, size * nmemb)
