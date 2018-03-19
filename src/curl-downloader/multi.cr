@@ -36,7 +36,7 @@ class Curl::Downloader
   def execute
     execute_async
     wait
-    true
+    self
   end
 
   def execute_async
