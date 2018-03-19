@@ -39,10 +39,12 @@ class Curl::Downloader
   end
 
   def execute_async
+    @started_at = Time.now
     LibCurl.curl_multi_add_handle(GCURL_MULTI, @curl)
   end
 
   def mark_finished
+    @finished_at = Time.now
     @ch.send(true)
   rescue Channel::ClosedError
   end
