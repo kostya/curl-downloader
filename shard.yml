@@ -11,7 +11,9 @@ dependencies:
     github: blocknotes/curl-crystal
 
 development_dependencies:
-  thread_pool:
-    github: kostya/thread_pool
+  run_with_fork:
+    github: kostya/run_with_fork
+  msgpack:
+    github: crystal-community/msgpack-crystal
 
 license: MIT
