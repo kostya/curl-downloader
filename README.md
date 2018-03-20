@@ -1,6 +1,11 @@
 # curl-downloader
 
-Downloader based on libcurl [binding](https://github.com/blocknotes/curl-crystal). This lib is not natural for crystal because libcurl is thread blocking, so for concurrent execution need to use something like [run_with_fork](https://github.com/kostya/run_with_fork)
+Powerfull http-client for Crystal based on [libcurl](https://curl.haxx.se/libcurl/) [binding](https://github.com/blocknotes/curl-crystal). LibCurl is much more powerfull than std crystal http-client, with features like: redirects, dns caching, interface binding, socks, proxing, sessions, and many others. LibCurl is usually hard to use directly in event based languages like Crystal, because it block main thread. To avoid thread blocking you can use [run_with_fork](https://github.com/kostya/run_with_fork).
+
+## Installation
+
+    $ brew install curl
+    $ apt-get install libcurl-dev
 
 ## Installation
 
@@ -72,4 +77,40 @@ end
 
 resp = Response.from_msgpack(r)
 p resp
+```
+
+## Example concurrent execution
+
+```crystal
+require "curl-downloader"
+require "run_with_fork"
+
+def request(url)
+  d = Curl::Downloader.new
+  d.url = url
+  d
+end
+
+# run with examples/test-server.cr
+reqs = Array.new((ARGV[0]? || 10).to_i) { request("http://127.0.0.1:8089/delay?n=#{rand(1.0)}") }
+
+t = Time.now
+
+ch = Channel(String).new
+
+reqs.each do |req| 
+  spawn do
+    r = Process.run_with_fork do |w|
+      req.execute
+      w.puts(req.url_effective)
+    end
+
+    ch.send r.gets.not_nil!
+    r.close
+  end
+end
+
+reqs.size.times { puts ch.receive }
+
+p Time.now - t
 ```
