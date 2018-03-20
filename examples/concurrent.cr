@@ -16,7 +16,7 @@ ch = Channel(String).new
 
 reqs.each do |req| 
   spawn do
-    r = Process.run_with_fork do |w|
+    pid, r = Process.run_with_fork do |w|
       req.execute
       w.puts(req.url_effective)
     end

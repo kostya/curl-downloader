@@ -10,7 +10,7 @@ struct Response
   })
 end
 
-r = Process.run_with_fork do |w|
+pid, r = Process.run_with_fork do |w|
   d = Curl::Downloader.new
   d.url = "https://google.com/"
   d.follow_redirects!
