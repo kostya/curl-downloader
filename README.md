@@ -44,7 +44,7 @@ p d.content_type
 d.free
 ```
 
-## Example with run_with_fork, to execute request in the background, and not to lock crystal main thread
+## Example run_with_fork
 
 ```crystal
 require "curl-downloader"
