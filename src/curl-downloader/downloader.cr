@@ -1,5 +1,5 @@
 class Curl::Downloader
-  VERSION = "0.1"
+  VERSION = "0.2"
 
   getter code
 
@@ -74,6 +74,11 @@ class Curl::Downloader
   # ex: ssl_verifypeer = false
   def ssl_verifypeer=(flag : Bool)
     set_opt(LibCurl::CURLoption::CURLOPT_SSL_VERIFYPEER, flag ? 1 : 0)
+  end
+
+  # ex: ssl_verifyhost = false
+  def ssl_verifyhost=(flag : Bool)
+    set_opt(LibCurl::CURLoption::CURLOPT_SSL_VERIFYHOST, flag ? 1 : 0)
   end
 
   def verbose!
