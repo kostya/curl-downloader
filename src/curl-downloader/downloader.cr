@@ -168,6 +168,11 @@ class Curl::Downloader
     free
   end
 
+  def clear_buffers
+    @content_buffer.io.clear
+    @headers_buffer.io.clear
+  end
+
   # ================== getters =======================
 
   def ok?
