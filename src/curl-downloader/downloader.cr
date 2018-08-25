@@ -139,6 +139,13 @@ class Curl::Downloader
     set_opt(LibCurl::CURLoption::CURLOPT_MAXREDIRS, max_redirs)
   end
 
+  # to execute HEAD method
+  #   downloader.method = "HEAD"
+  #   downloader.no_body!
+  def no_body!
+    set_opt(LibCurl::CURLoption::CURLOPT_NOBODY, 1)
+  end
+
   # =============================== execution =================================
 
   WRITE_DATA_CALLBACK = ->(ptr : UInt8*, size : LibC::SizeT, nmemb : LibC::SizeT, data : Void*) do
