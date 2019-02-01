@@ -1,3 +1,5 @@
+require "gzip"
+
 class Curl::Downloader
   VERSION = "0.3"
 
@@ -191,11 +193,25 @@ class Curl::Downloader
   end
 
   def content
-    @content_buffer.io.to_s
+    if gzip?
+      Gzip::Reader.open(@content_buffer.io.rewind) do |gzip|
+        gzip.gets_to_end
+      end
+    else
+      @content_buffer.io.to_s
+    end
+  rescue Gzip::Error
+    @content_buffer.io.rewind.to_s
   end
 
   def headers
     @headers_buffer.io.to_s
+  end
+
+  def gzip?
+    headers.split("\n").any? do |row|
+      row.includes?("content-encoding") && row.includes?("gzip")
+    end
   end
 
   def http_status
