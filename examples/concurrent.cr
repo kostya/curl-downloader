@@ -14,7 +14,7 @@ t = Time.now
 
 ch = Channel(String).new
 
-reqs.each do |req| 
+reqs.each do |req|
   spawn do
     pid, r = Process.run_with_fork do |w|
       req.execute

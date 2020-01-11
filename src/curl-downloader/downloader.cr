@@ -157,9 +157,9 @@ class Curl::Downloader
   # run execution
   def execute
     return if @finalized
-    @started_at = Time.now
+    @started_at = Time.local
     @code = LibCurl.curl_easy_perform @curl
-    @finished_at = Time.now
+    @finished_at = Time.local
     true
   end
 

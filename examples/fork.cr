@@ -4,9 +4,9 @@ require "msgpack"
 
 struct Response
   MessagePack.mapping({
-    code: Int32,
+    code:        Int32,
     http_status: Int32,
-    content: String,
+    content:     String,
   })
 end
 
@@ -21,9 +21,9 @@ pid, r = Process.run_with_fork do |w|
 
   d.execute
 
-  {code: d.code, 
-    http_status: d.http_status,
-    content: d.content}.to_msgpack(w)
+  {code:        d.code,
+   http_status: d.http_status,
+   content:     d.content}.to_msgpack(w)
 end
 
 resp = Response.from_msgpack(r)
