@@ -1,5 +1,5 @@
 class Curl::Downloader
-  VERSION = "0.4"
+  VERSION = "0.5"
 
   getter code
 

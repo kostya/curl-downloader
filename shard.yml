@@ -1,14 +1,14 @@
 name: curl-downloader
-version: 0.4
+version: 0.5
 
 authors:
   - Konstantin Makarchev <kostya27@gmail.com>
 
-crystal: 0.22.0
+crystal: ">= 0.34.0, < 2.0.0"
 
 dependencies:
   curl-crystal:
-    github: blocknotes/curl-crystal
+    github: kostya/curl-crystal
 
 development_dependencies:
   run_with_fork:
